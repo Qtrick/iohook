@@ -1115,11 +1115,20 @@ UIOHOOK_API void grab_mouse_click(bool enabled) {
 UIOHOOK_API int hook_run() {
 	int status = UIOHOOK_SUCCESS;
 
-	// Check for accessibility before we start the loop.
+	// On modern macOS, keyboard taps primarily need Input Monitoring.
+	// AXIsProcessTrusted often returns false for ad-hoc signed Electron apps
+	// even when Input Monitoring is granted — so do not hard-fail on AX.
+	// Still attempt CGEventTapCreate; that is what actually registers the app
+	// under Privacy → Input Monitoring after a TCC reset.
 	if (is_accessibility_enabled()) {
 		logger(LOG_LEVEL_DEBUG,	"%s [%u]: Accessibility API is enabled.\n",
 				__FUNCTION__, __LINE__);
+	} else {
+		logger(LOG_LEVEL_WARN,	"%s [%u]: Accessibility API reports disabled; attempting event tap anyway.\n",
+				__FUNCTION__, __LINE__);
+	}
 
+	{
 		do {
 			// Reset the restart flag...
 			restart_tap = false;
@@ -1331,13 +1340,6 @@ UIOHOOK_API int hook_run() {
 				status = UIOHOOK_ERROR_OUT_OF_MEMORY;
 			}
 		} while (restart_tap);
-	}
-	else {
-		logger(LOG_LEVEL_ERROR,	"%s [%u]: Accessibility API is disabled!\n",
-				__FUNCTION__, __LINE__);
-
-		// Set the exit status.
-		status = UIOHOOK_ERROR_AXAPI_DISABLED;
 	}
 
 	logger(LOG_LEVEL_DEBUG,	"%s [%u]: Something, something, something, complete.\n",

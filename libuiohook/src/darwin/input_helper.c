@@ -62,8 +62,11 @@ bool is_accessibility_enabled() {
 					__FUNCTION__, __LINE__, dlError);
 		} else if (kAXTrustedCheckOptionPrompt_t != NULL) {
 			// New accessibility API 10.9 and later.
+			// Never prompt here — prompting from the native hook every start()
+			// spams macOS permission dialogs. The Electron app guides the user
+			// to System Settings when needed. Check trust status only.
 			const void * keys[] = { *kAXTrustedCheckOptionPrompt_t };
-			const void * values[] = { kCFBooleanTrue };
+			const void * values[] = { kCFBooleanFalse };
 
 			CFDictionaryRef options = CFDictionaryCreate(
 					kCFAllocatorDefault,
@@ -74,6 +77,9 @@ bool is_accessibility_enabled() {
 					&kCFTypeDictionaryValueCallBacks);
 
 			is_enabled = (*AXIsProcessTrustedWithOptions_t)(options);
+			if (options != NULL) {
+				CFRelease(options);
+			}
 		}
 	} else {
 		if (dlError != NULL) {
