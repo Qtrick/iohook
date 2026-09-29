@@ -15,9 +15,7 @@
 		],
 		"link_settings": {
 				"libraries": [
-						"-Wl,-rpath,@executable_path/.",
-						"-Wl,-rpath,@loader_path/.",
-						"-Wl,-rpath,<!(pwd)/build/Release/"
+						"-Wl,-rpath,@loader_path/."
 				]
 		},
 		"include_dirs": [

@@ -1171,7 +1171,7 @@ UIOHOOK_API int hook_run() {
 				hook->port = CGEventTapCreate(
 						kCGSessionEventTap,			// kCGHIDEventTap
 						kCGHeadInsertEventTap,		// kCGTailAppendEventTap
-						kCGEventTapOptionDefault,	// kCGEventTapOptionListenOnly See Bug #22
+						kCGEventTapOptionListenOnly,
 						event_mask,
 						hook_event_proc,
 						NULL);
